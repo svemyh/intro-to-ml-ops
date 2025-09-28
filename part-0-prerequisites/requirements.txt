@@ -1,0 +1,4 @@
+# Requirements for creating the sample model
+scikit-learn>=1.2.0
+joblib>=1.2.0
+numpy>=1.21.0

@@ -1,0 +1,14 @@
+# FastAPI and server requirements
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Data validation
+pydantic==2.5.0
+
+# ML model dependencies
+scikit-learn>=1.2.0
+joblib>=1.2.0
+numpy>=1.21.0
+
+# Optional: for better performance in production
+python-multipart==0.0.6
