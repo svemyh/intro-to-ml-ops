@@ -7,9 +7,10 @@ This script trains a simple classifier on the Iris dataset and saves it.
 import joblib
 import numpy as np
 from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+
 
 def create_sample_model():
     """Create and save a sample ML model using the Iris dataset."""
@@ -34,11 +35,7 @@ def create_sample_model():
 
     # Train a Random Forest classifier
     print("\n🚀 Training Random Forest classifier...")
-    model = RandomForestClassifier(
-        n_estimators=100,
-        random_state=42,
-        max_depth=3
-    )
+    model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=3)
     model.fit(X_train, y_train)
 
     # Evaluate the model
@@ -54,7 +51,7 @@ def create_sample_model():
     print(classification_report(y_test, y_pred, target_names=iris.target_names))
 
     # Save the model
-    model_filename = 'iris_model.pkl'
+    model_filename = "iris_model.pkl"
     joblib.dump(model, model_filename)
     print(f"\n💾 Model saved as '{model_filename}'")
 
@@ -67,21 +64,23 @@ def create_sample_model():
 
     # Create a sample data file for testing
     sample_data = {
-        'feature_names': list(iris.feature_names),
-        'target_names': list(iris.target_names),
-        'sample_inputs': [
+        "feature_names": list(iris.feature_names),
+        "target_names": list(iris.target_names),
+        "sample_inputs": [
             [5.1, 3.5, 1.4, 0.2],  # setosa
             [6.2, 2.8, 4.8, 1.8],  # versicolor
             [7.3, 2.9, 6.3, 1.8],  # virginica
-        ]
+        ],
     }
 
     import json
-    with open('sample_data.json', 'w') as f:
+
+    with open("sample_data.json", "w") as f:
         json.dump(sample_data, f, indent=2)
 
     print(f"\n📝 Sample data saved as 'sample_data.json'")
     print("\n🎉 Setup complete! You're ready for Part 1.")
+
 
 if __name__ == "__main__":
     create_sample_model()

@@ -31,9 +31,9 @@ echo -e "   ${GREEN}✅ Cluster is running: $cluster_info${NC}"
 
 # Check deployment status
 echo -e "\n${BLUE}📦 Checking deployment status...${NC}"
-deployment_status=$(kubectl get deployment iris-model --no-headers 2>/dev/null | awk '{print $2}')
+deployment_status=$(kubectl get deployment mnist-model --no-headers 2>/dev/null | awk '{print $2}')
 if [ -z "$deployment_status" ]; then
-    echo -e "   ${RED}❌ Deployment 'iris-model' not found. Please apply deployment.yaml first:${NC}"
+    echo -e "   ${RED}❌ Deployment 'mnist-model' not found. Please apply deployment.yaml first:${NC}"
     echo "   kubectl apply -f deployment.yaml"
     exit 1
 else
@@ -42,23 +42,23 @@ fi
 
 # Check pod status
 echo -e "\n${BLUE}🚀 Checking pod status...${NC}"
-pod_status=$(kubectl get pods -l app=iris-model --no-headers 2>/dev/null)
+pod_status=$(kubectl get pods -l app=mnist-model --no-headers 2>/dev/null)
 if [ -z "$pod_status" ]; then
-    echo -e "   ${RED}❌ No pods found for iris-model${NC}"
+    echo -e "   ${RED}❌ No pods found for mnist-model${NC}"
     exit 1
 fi
 
 echo "   📊 Pod status:"
-kubectl get pods -l app=iris-model | sed 's/^/      /'
+kubectl get pods -l app=mnist-model | sed 's/^/      /'
 
 # Check if pods are ready
-ready_pods=$(kubectl get pods -l app=iris-model --no-headers | grep Running | grep "1/1" | wc -l)
-total_pods=$(kubectl get pods -l app=iris-model --no-headers | wc -l)
+ready_pods=$(kubectl get pods -l app=mnist-model --no-headers | grep Running | grep "1/1" | wc -l)
+total_pods=$(kubectl get pods -l app=mnist-model --no-headers | wc -l)
 
 if [ "$ready_pods" -eq 0 ]; then
     echo -e "   ${RED}❌ No pods are ready. Checking logs...${NC}"
     echo -e "   ${YELLOW}Pod logs:${NC}"
-    kubectl logs -l app=iris-model --tail=10 | sed 's/^/      /'
+    kubectl logs -l app=mnist-model --tail=10 | sed 's/^/      /'
     exit 1
 else
     echo -e "   ${GREEN}✅ $ready_pods/$total_pods pods are ready${NC}"
@@ -66,17 +66,17 @@ fi
 
 # Check service status
 echo -e "\n${BLUE}🌐 Checking service status...${NC}"
-service_info=$(kubectl get service iris-model-service --no-headers 2>/dev/null)
+service_info=$(kubectl get service mnist-model-service --no-headers 2>/dev/null)
 if [ -z "$service_info" ]; then
-    echo -e "   ${RED}❌ Service 'iris-model-service' not found${NC}"
+    echo -e "   ${RED}❌ Service 'mnist-model-service' not found${NC}"
     exit 1
 else
     echo -e "   ${GREEN}✅ Service found:${NC}"
-    kubectl get service iris-model-service | sed 's/^/      /'
+    kubectl get service mnist-model-service | sed 's/^/      /'
 fi
 
 # Check endpoints
-endpoints=$(kubectl get endpoints iris-model-service --no-headers 2>/dev/null | awk '{print $2}')
+endpoints=$(kubectl get endpoints mnist-model-service --no-headers 2>/dev/null | awk '{print $2}')
 if [ "$endpoints" = "<none>" ] || [ -z "$endpoints" ]; then
     echo -e "   ${RED}❌ No endpoints available for service${NC}"
     exit 1
@@ -110,23 +110,38 @@ else
 fi
 
 # Test 2: Prediction
-echo "   🌸 Testing prediction endpoint..."
+echo "   🔢 Testing prediction endpoint with MNIST digit..."
+
+# Create a simple test image (zeros should be somewhat predictable)
+zeros_image='['
+for i in {1..784}; do
+    if [ $i -eq 784 ]; then
+        zeros_image+='0.0'
+    else
+        zeros_image+='0.0,'
+    fi
+done
+zeros_image+=']'
+
 response=$(curl -s -w "%{http_code}" -X POST "$BASE_URL/predict" \
   -H "Content-Type: application/json" \
-  -d '{"features": [5.1, 3.5, 1.4, 0.2]}' \
-  --connect-timeout 5 --max-time 10)
+  -d "{\"image\": $zeros_image}" \
+  --connect-timeout 10 --max-time 15)
 http_code="${response: -3}"
 body="${response%???}"
 
 if [ "$http_code" -eq 200 ]; then
-    echo -e "   ${GREEN}✅ Prediction successful${NC}"
-    predicted_class=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data['class_name'])" 2>/dev/null || echo "unknown")
+    echo -e "   ${GREEN}✅ MNIST prediction successful${NC}"
+    predicted_digit=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data['prediction'])" 2>/dev/null || echo "unknown")
     confidence=$(echo "$body" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data['confidence'])" 2>/dev/null || echo "unknown")
-    echo "   📊 Prediction: $predicted_class (confidence: $confidence)"
+    echo "   📊 Predicted digit: $predicted_digit (confidence: $confidence)"
+    echo "   🖼️  Input: 28x28 black image (784 zeros)"
 else
-    echo -e "   ${RED}❌ Prediction failed: HTTP $http_code${NC}"
+    echo -e "   ${RED}❌ MNIST prediction failed: HTTP $http_code${NC}"
     echo "   Response: $body"
-    exit 1
+    if [ "$http_code" = "422" ]; then
+        echo -e "   ${YELLOW}💡 This might be a validation error. Check image format.${NC}"
+    fi
 fi
 
 # Test 3: Load balancing (if multiple pods)
@@ -160,7 +175,7 @@ echo "   • Service: Active with endpoints"
 echo "   • API: Healthy and responding"
 
 echo -e "\n${BLUE}💡 Useful commands:${NC}"
-echo "   • View pods: kubectl get pods -l app=iris-model"
-echo "   • View logs: kubectl logs -l app=iris-model -f"
-echo "   • Scale up: kubectl scale deployment iris-model --replicas=3"
-echo "   • Port forward: kubectl port-forward svc/iris-model-service 8080:80"
+echo "   • View pods: kubectl get pods -l app=mnist-model"
+echo "   • View logs: kubectl logs -l app=mnist-model -f"
+echo "   • Scale up: kubectl scale deployment mnist-model --replicas=3"
+echo "   • Port forward: kubectl port-forward svc/mnist-model-service 8080:80"

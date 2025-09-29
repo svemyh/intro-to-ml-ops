@@ -1,34 +1,47 @@
 """
-Modal serverless deployment of the Iris Classification model.
+Modal serverless deployment of the MNIST Digit Classification model.
 This replaces all the infrastructure from Parts 1-3 with ~20 lines of Python.
 """
 
 import modal
 
 # Create Modal app
-app = modal.App("iris-classifier")
+app = modal.App("mnist-classifier")
 
 # Define the runtime environment
-image = modal.Image.debian_slim().pip_install(
-    "scikit-learn>=1.2.0",
-    "joblib>=1.2.0",
-    "numpy>=1.21.0"
-)
+image = modal.Image.debian_slim().pip_install("torch>=1.9.0", "numpy>=1.21.0")
 
 # Mount the trained model file
 model_mount = modal.Mount.from_local_file(
-    "iris_model.pkl",
-    remote_path="/root/iris_model.pkl"
+    "mnist_model.pth", remote_path="/root/mnist_model.pth"
 )
 
-@app.function(
-    image=image,
-    mounts=[model_mount]
-)
+
+# Define the model architecture (must match training)
+class MNISTModel:
+    def __init__(self):
+        import torch.nn as nn
+
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(28 * 28, 128)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(128, 10)
+
+    def __call__(self, x):
+        import torch.nn.functional as F
+
+        x = self.flatten(x)
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x
+
+
+@app.function(image=image, mounts=[model_mount])
 @modal.web_endpoint(method="POST", label="predict")
 def predict(item: dict):
     """
-    Predict iris class from features.
+    Predict digit from 28x28 image.
 
     This single function replaces:
     - FastAPI application code
@@ -39,50 +52,86 @@ def predict(item: dict):
     - Health checks
     - Container registry management
     """
-    import joblib
     import numpy as np
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+
+    # Recreate model architecture
+    class MNISTModel(nn.Module):
+        def __init__(self):
+            super(MNISTModel, self).__init__()
+            self.flatten = nn.Flatten()
+            self.fc1 = nn.Linear(28 * 28, 128)
+            self.relu = nn.ReLU()
+            self.fc2 = nn.Linear(128, 10)
+
+        def forward(self, x):
+            x = self.flatten(x)
+            x = self.fc1(x)
+            x = self.relu(x)
+            x = self.fc2(x)
+            return x
 
     # Load the model (cached after first call)
-    model = joblib.load("/root/iris_model.pkl")
+    checkpoint = torch.load("/root/mnist_model.pth", map_location="cpu")
+    model = MNISTModel()
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
 
     # Validate input
-    features = item.get("features", [])
-    if len(features) != 4:
-        return {"error": "Exactly 4 features required"}
+    image_data = item.get("image", [])
 
-    # Make prediction
-    X = np.array(features).reshape(1, -1)
-    prediction = model.predict(X)[0]
-    probabilities = model.predict_proba(X)[0]
+    # Handle both flat and 2D input formats
+    if isinstance(image_data[0], list) if image_data else False:  # 2D format
+        if len(image_data) != 28 or any(len(row) != 28 for row in image_data):
+            return {"error": "2D image must be 28x28 pixels"}
+        image_data = [pixel for row in image_data for pixel in row]  # Flatten
 
-    # Map to class names
-    class_names = ["setosa", "versicolor", "virginica"]
+    if len(image_data) != 784:
+        return {"error": "Image must have exactly 784 pixel values (28x28)"}
 
-    return {
-        "prediction": int(prediction),
-        "class_name": class_names[prediction],
-        "confidence": float(probabilities[prediction]),
-        "features_used": features
-    }
+    try:
+        # Convert to tensor and add batch/channel dimensions
+        image_tensor = torch.tensor(image_data, dtype=torch.float32).reshape(
+            1, 1, 28, 28
+        )
 
-@app.function(
-    image=image,
-    mounts=[model_mount]
-)
+        # Apply MNIST normalization
+        normalized_image = (image_tensor - 0.1307) / 0.3081
+
+        # Make prediction
+        with torch.no_grad():
+            output = model(normalized_image)
+            probabilities = F.softmax(output, dim=1)
+            prediction = output.argmax(dim=1).item()
+            confidence = probabilities[0][prediction].item()
+
+        return {
+            "prediction": prediction,
+            "class_name": str(prediction),
+            "confidence": confidence,
+            "probabilities": probabilities[0].tolist(),
+        }
+    except Exception as e:
+        return {"error": f"Prediction failed: {str(e)}"}
+
+
+@app.function(image=image, mounts=[model_mount])
 @modal.web_endpoint(method="GET", label="health")
 def health():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "model_loaded": True,
-        "service": "iris-classifier",
-        "platform": "modal"
+        "service": "mnist-classifier",
+        "platform": "modal",
+        "model_type": "PyTorch Neural Network",
+        "task": "Handwritten digit recognition (0-9)",
     }
 
-@app.function(
-    image=image,
-    mounts=[model_mount]
-)
+
+@app.function(image=image, mounts=[model_mount])
 @modal.web_endpoint(method="GET", label="info")
 def info():
     """Get model information."""
@@ -99,65 +148,109 @@ def info():
         pass
 
     return {
-        "model": "Iris Classification",
-        "algorithm": "Random Forest",
-        "features": [
-            "sepal length (cm)",
-            "sepal width (cm)",
-            "petal length (cm)",
-            "petal width (cm)"
+        "model": "MNIST Digit Classifier",
+        "algorithm": "Neural Network (PyTorch)",
+        "input_format": "28x28 pixel image (784 values, 0-1 range)",
+        "classes": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        "class_names": [
+            "Zero",
+            "One",
+            "Two",
+            "Three",
+            "Four",
+            "Five",
+            "Six",
+            "Seven",
+            "Eight",
+            "Nine",
         ],
-        "classes": ["setosa", "versicolor", "virginica"],
-        "sample_data": sample_data.get("sample_inputs", [
-            [5.1, 3.5, 1.4, 0.2],
-            [6.2, 2.8, 4.8, 1.8],
-            [7.3, 2.9, 6.3, 1.8]
-        ])
+        "architecture": "Flatten → Linear(784→128) → ReLU → Linear(128→10)",
+        "normalization": "mean=0.1307, std=0.3081",
     }
 
+
 # Optional: Batch processing endpoint
-@app.function(
-    image=image,
-    mounts=[model_mount]
-)
+@app.function(image=image, mounts=[model_mount])
 @modal.web_endpoint(method="POST", label="batch-predict")
 def batch_predict(items: list):
     """
-    Batch prediction endpoint for processing multiple samples efficiently.
+    Batch prediction endpoint for processing multiple MNIST images efficiently.
     """
-    import joblib
     import numpy as np
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
 
-    model = joblib.load("/root/iris_model.pkl")
-    class_names = ["setosa", "versicolor", "virginica"]
+    # Recreate and load model
+    class MNISTModel(nn.Module):
+        def __init__(self):
+            super(MNISTModel, self).__init__()
+            self.flatten = nn.Flatten()
+            self.fc1 = nn.Linear(28 * 28, 128)
+            self.relu = nn.ReLU()
+            self.fc2 = nn.Linear(128, 10)
+
+        def forward(self, x):
+            x = self.flatten(x)
+            x = self.fc1(x)
+            x = self.relu(x)
+            x = self.fc2(x)
+            return x
+
+    checkpoint = torch.load("/root/mnist_model.pth", map_location="cpu")
+    model = MNISTModel()
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
 
     results = []
     for item in items:
         try:
-            features = item.get("features", [])
-            if len(features) != 4:
-                results.append({"error": "Exactly 4 features required"})
+            image_data = item.get("image", [])
+
+            # Handle both flat and 2D input formats
+            if isinstance(image_data[0], list) if image_data else False:
+                if len(image_data) != 28 or any(len(row) != 28 for row in image_data):
+                    results.append({"error": "2D image must be 28x28 pixels"})
+                    continue
+                image_data = [pixel for row in image_data for pixel in row]
+
+            if len(image_data) != 784:
+                results.append(
+                    {"error": "Image must have exactly 784 pixel values (28x28)"}
+                )
                 continue
 
-            X = np.array(features).reshape(1, -1)
-            prediction = model.predict(X)[0]
-            probabilities = model.predict_proba(X)[0]
+            # Convert to tensor and predict
+            image_tensor = torch.tensor(image_data, dtype=torch.float32).reshape(
+                1, 1, 28, 28
+            )
+            normalized_image = (image_tensor - 0.1307) / 0.3081
 
-            results.append({
-                "prediction": int(prediction),
-                "class_name": class_names[prediction],
-                "confidence": float(probabilities[prediction]),
-                "features_used": features
-            })
+            with torch.no_grad():
+                output = model(normalized_image)
+                probabilities = F.softmax(output, dim=1)
+                prediction = output.argmax(dim=1).item()
+                confidence = probabilities[0][prediction].item()
+
+            results.append(
+                {
+                    "prediction": prediction,
+                    "class_name": str(prediction),
+                    "confidence": confidence,
+                    "probabilities": probabilities[0].tolist(),
+                }
+            )
         except Exception as e:
             results.append({"error": str(e)})
 
     return {"results": results, "count": len(results)}
 
+
 if __name__ == "__main__":
     print("This is a Modal app. Deploy it with:")
     print("modal deploy app_modal.py")
     print("\nAfter deployment, you'll get URLs like:")
-    print("• https://username--iris-classifier-predict.modal.run")
-    print("• https://username--iris-classifier-health.modal.run")
-    print("• https://username--iris-classifier-info.modal.run")
+    print("• https://username--mnist-classifier-predict.modal.run")
+    print("• https://username--mnist-classifier-health.modal.run")
+    print("• https://username--mnist-classifier-info.modal.run")
+    print("• https://username--mnist-classifier-batch-predict.modal.run")

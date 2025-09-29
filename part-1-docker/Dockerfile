@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application code and model files
 COPY app.py .
-COPY iris_model.pkl .
+COPY mnist_model.pth .
 COPY sample_data.json .
 
 # Create non-root user for security

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iris-model
+  name: mnist-model
   labels:
-    app: iris-model
+    app: mnist-model
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: iris-model
+      app: mnist-model
   template:
     metadata:
       labels:
-        app: iris-model
+        app: mnist-model
     spec:
       containers:
-      - name: iris-model
-        image: ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/iris-model-api:latest
+      - name: mnist-model
+        image: ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/mnist-model-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -27,11 +27,11 @@ spec:
           value: "aws"
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
         livenessProbe:
           httpGet:
             path: /health
@@ -52,15 +52,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: iris-model-service
+  name: mnist-model-service
   labels:
-    app: iris-model
+    app: mnist-model
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
 spec:
   type: LoadBalancer
   selector:
-    app: iris-model
+    app: mnist-model
   ports:
   - name: http
     port: 80
@@ -70,12 +70,12 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: iris-model-hpa
+  name: mnist-model-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: iris-model
+    name: mnist-model
   minReplicas: 2
   maxReplicas: 10
   metrics:

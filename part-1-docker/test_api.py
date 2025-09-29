@@ -4,10 +4,12 @@ Test script for the Iris Classification API.
 Run this to verify that your API is working correctly.
 """
 
-import requests
 import json
 import sys
 import time
+
+import requests
+
 
 def test_api(base_url="http://localhost:8000"):
     """Test all API endpoints."""
@@ -46,18 +48,18 @@ def test_api(base_url="http://localhost:8000"):
         {
             "name": "Setosa sample",
             "features": [5.1, 3.5, 1.4, 0.2],
-            "expected_class": "setosa"
+            "expected_class": "setosa",
         },
         {
             "name": "Versicolor sample",
             "features": [6.2, 2.8, 4.8, 1.8],
-            "expected_class": "versicolor"
+            "expected_class": "versicolor",
         },
         {
             "name": "Virginica sample",
             "features": [7.3, 2.9, 6.3, 1.8],
-            "expected_class": "virginica"
-        }
+            "expected_class": "virginica",
+        },
     ]
 
     for test_case in test_cases:
@@ -67,19 +69,23 @@ def test_api(base_url="http://localhost:8000"):
                 f"{base_url}/predict",
                 json=payload,
                 headers={"Content-Type": "application/json"},
-                timeout=5
+                timeout=5,
             )
 
             if response.status_code == 200:
                 result = response.json()
                 predicted_class = result["class_name"]
                 confidence = result["confidence"]
-                print(f"   ✅ {test_case['name']}: {predicted_class} (confidence: {confidence:.3f})")
+                print(
+                    f"   ✅ {test_case['name']}: {predicted_class} (confidence: {confidence:.3f})"
+                )
 
                 if predicted_class == test_case["expected_class"]:
                     print(f"      🎯 Prediction matches expected class!")
                 else:
-                    print(f"      ⚠️  Expected {test_case['expected_class']}, got {predicted_class}")
+                    print(
+                        f"      ⚠️  Expected {test_case['expected_class']}, got {predicted_class}"
+                    )
             else:
                 print(f"   ❌ {test_case['name']} failed: {response.status_code}")
                 print(f"      Response: {response.text}")
@@ -90,21 +96,17 @@ def test_api(base_url="http://localhost:8000"):
     # Test 4: Invalid input validation
     print("\n4. Testing input validation...")
     invalid_cases = [
-        {
-            "name": "Too few features",
-            "features": [5.1, 3.5],
-            "should_fail": True
-        },
+        {"name": "Too few features", "features": [5.1, 3.5], "should_fail": True},
         {
             "name": "Too many features",
             "features": [5.1, 3.5, 1.4, 0.2, 1.0],
-            "should_fail": True
+            "should_fail": True,
         },
         {
             "name": "Negative features",
             "features": [-1.0, 3.5, 1.4, 0.2],
-            "should_fail": True
-        }
+            "should_fail": True,
+        },
     ]
 
     for test_case in invalid_cases:
@@ -114,21 +116,26 @@ def test_api(base_url="http://localhost:8000"):
                 f"{base_url}/predict",
                 json=payload,
                 headers={"Content-Type": "application/json"},
-                timeout=5
+                timeout=5,
             )
 
             if test_case["should_fail"] and response.status_code != 200:
-                print(f"   ✅ {test_case['name']}: Correctly rejected (status: {response.status_code})")
+                print(
+                    f"   ✅ {test_case['name']}: Correctly rejected (status: {response.status_code})"
+                )
             elif not test_case["should_fail"] and response.status_code == 200:
                 print(f"   ✅ {test_case['name']}: Correctly accepted")
             else:
-                print(f"   ❌ {test_case['name']}: Unexpected result (status: {response.status_code})")
+                print(
+                    f"   ❌ {test_case['name']}: Unexpected result (status: {response.status_code})"
+                )
 
         except Exception as e:
             print(f"   ❌ {test_case['name']} failed: {e}")
 
     print("\n🎉 API testing complete!")
     return True
+
 
 def wait_for_server(base_url="http://localhost:8000", max_attempts=10):
     """Wait for the server to be ready."""
@@ -146,6 +153,7 @@ def wait_for_server(base_url="http://localhost:8000", max_attempts=10):
 
     print("❌ Server did not become ready in time")
     return False
+
 
 if __name__ == "__main__":
     # Get base URL from command line or use default

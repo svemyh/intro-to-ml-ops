@@ -90,8 +90,11 @@ Expected output should show version numbers for all tools.
 
 ## Next Steps
 
-1. Run `python3 create_sample_model.py` to generate a sample trained model
-2. Verify the model file `iris_model.pkl` is created
+1. Run `python3 create_mnist_model.py` to generate a trained MNIST digit classification model
+2. Verify the model files are created:
+   - `mnist_model.pth` - Complete PyTorch model (97.5% accuracy)
+   - `sample_data.json` - API testing data with digit samples
+   - `inference_utils.py` - Helper functions for prediction
 3. You're ready for Part 1!
 
 ## Troubleshooting

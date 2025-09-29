@@ -57,34 +57,44 @@ gcloud container clusters get-credentials mlops-demo --zone=us-central1-a
 ### 2. Push Image to Container Registry
 ```bash
 # Tag the image for Google Container Registry
-docker tag iris-model-api:latest gcr.io/YOUR_PROJECT_ID/iris-model-api:latest
+docker tag mnist-model-api:latest gcr.io/YOUR_PROJECT_ID/mnist-model-api:latest
 
 # Push to registry
-docker push gcr.io/YOUR_PROJECT_ID/iris-model-api:latest
+docker push gcr.io/YOUR_PROJECT_ID/mnist-model-api:latest
 ```
 
 ### 3. Update Deployment for GKE
 ```bash
 # Update the image in deployment-gke.yaml
-sed -i 's/iris-model-api:latest/gcr.io\/YOUR_PROJECT_ID\/iris-model-api:latest/' deployment-gke.yaml
+sed -i 's/mnist-model-api:latest/gcr.io\/YOUR_PROJECT_ID\/mnist-model-api:latest/' deployment-gke.yaml
 
 # Apply deployment
 kubectl apply -f deployment-gke.yaml
 
 # Get external IP
-kubectl get services iris-model-service -w
+kubectl get services mnist-model-service -w
 ```
 
 ### 4. Test Cloud Deployment
 ```bash
 # Get external IP
-EXTERNAL_IP=$(kubectl get service iris-model-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+EXTERNAL_IP=$(kubectl get service mnist-model-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 # Test the API
 curl http://$EXTERNAL_IP/health
+
+# Test digit prediction (create test image first)
+python3 -c "
+import json
+zeros_image = [0.0] * 784  # 28x28 black image
+data = {'image': zeros_image}
+with open('cloud_test.json', 'w') as f:
+    json.dump(data, f)
+"
+
 curl -X POST http://$EXTERNAL_IP/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [5.1, 3.5, 1.4, 0.2]}'
+  -d @cloud_test.json
 ```
 
 ### 5. Cleanup GKE
@@ -125,14 +135,14 @@ eksctl create cluster \
 ### 2. Push Image to ECR
 ```bash
 # Create ECR repository
-aws ecr create-repository --repository-name iris-model-api --region us-west-2
+aws ecr create-repository --repository-name mnist-model-api --region us-west-2
 
 # Get login token
 aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com
 
 # Tag and push image
-docker tag iris-model-api:latest ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/iris-model-api:latest
-docker push ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/iris-model-api:latest
+docker tag mnist-model-api:latest ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/mnist-model-api:latest
+docker push ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/mnist-model-api:latest
 ```
 
 ### 3. Deploy to EKS
@@ -142,7 +152,7 @@ docker push ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/iris-model-api:latest
 kubectl apply -f deployment-eks.yaml
 
 # Get load balancer URL
-kubectl get services iris-model-service
+kubectl get services mnist-model-service
 ```
 
 ### 4. Cleanup EKS
@@ -191,8 +201,8 @@ az acr create --resource-group mlops-demo-rg --name mlopsdemoacr --sku Basic --a
 az acr login --name mlopsdemoacr
 
 # Tag and push image
-docker tag iris-model-api:latest mlopsdemoacr.azurecr.io/iris-model-api:latest
-docker push mlopsdemoacr.azurecr.io/iris-model-api:latest
+docker tag mnist-model-api:latest mlopsdemoacr.azurecr.io/mnist-model-api:latest
+docker push mlopsdemoacr.azurecr.io/mnist-model-api:latest
 ```
 
 ### 3. Deploy to AKS
@@ -202,7 +212,7 @@ docker push mlopsdemoacr.azurecr.io/iris-model-api:latest
 kubectl apply -f deployment-aks.yaml
 
 # Get external IP
-kubectl get services iris-model-service
+kubectl get services mnist-model-service
 ```
 
 ### 4. Cleanup AKS

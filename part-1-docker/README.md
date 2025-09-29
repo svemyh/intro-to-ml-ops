@@ -14,7 +14,7 @@
 ### 1.1 Copy Your Trained Model
 Copy the model files from Part 0:
 ```bash
-cp ../part-0-prerequisites/iris_model.pkl .
+cp ../part-0-prerequisites/mnist_model.pth .
 cp ../part-0-prerequisites/sample_data.json .
 ```
 
@@ -43,20 +43,28 @@ Open a new terminal and test the endpoint:
 # Test health check
 curl http://localhost:8000/health
 
+# Test prediction with a sample digit (get sample data first)
+curl -s http://localhost:8000/sample-data
+
+# Create a simple test with zeros (28x28 = 784 pixels)
+python3 -c "
+import json
+zeros_image = [0.0] * 784  # 28x28 black image
+data = {'image': zeros_image}
+with open('test_image.json', 'w') as f:
+    json.dump(data, f)
+print('Created test_image.json with 784 zero pixels')
+"
+
 # Test prediction
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [5.1, 3.5, 1.4, 0.2]}'
-
-# Test with different samples
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": [6.2, 2.8, 4.8, 1.8]}'
+  -d @test_image.json
 ```
 
 Expected response:
 ```json
-{"prediction": 0, "class_name": "setosa", "confidence": 0.95}
+{"prediction": 3, "class_name": "3", "confidence": 0.42, "probabilities": [...], "image_shape": [28, 28]}
 ```
 
 ### 1.5 View API Documentation
@@ -66,12 +74,12 @@ Visit http://localhost:8000/docs to see the automatically generated API document
 
 ### 2.1 Build Docker Image
 ```bash
-docker build -t iris-model-api .
+docker build -t mnist-model-api .
 ```
 
 ### 2.2 Run Container
 ```bash
-docker run -p 8080:80 iris-model-api
+docker run -p 8080:80 mnist-model-api
 ```
 
 ### 2.3 Test Containerized API
@@ -82,7 +90,7 @@ curl http://localhost:8080/health
 # Test prediction
 curl -X POST http://localhost:8080/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [5.1, 3.5, 1.4, 0.2]}'
+  -d @test_image.json
 ```
 
 ### 2.4 Check Container Status

@@ -36,7 +36,7 @@ k3d-mlops-demo-server-0   Ready    control-plane,master   30s   v1.27.4+k3s1
 ### 1.2 Load Docker Image into k3d
 ```bash
 # Import your Docker image into the k3d cluster
-k3d image import iris-model-api:latest -c mlops-demo
+k3d image import mnist-model-api:latest -c mlops-demo
 
 # Verify the image is available
 kubectl describe nodes | grep -A 5 "Non-terminated Pods"
@@ -58,16 +58,16 @@ kubectl get services
 ### 2.2 Wait for Deployment
 ```bash
 # Wait for pods to be ready
-kubectl wait --for=condition=ready pod -l app=iris-model --timeout=300s
+kubectl wait --for=condition=ready pod -l app=mnist-model --timeout=300s
 
 # Check pod logs
-kubectl logs -l app=iris-model
+kubectl logs -l app=mnist-model
 ```
 
 ### 2.3 Port Forward to Access Service
 ```bash
 # Forward local port to service
-kubectl port-forward svc/iris-model-service 8080:80 &
+kubectl port-forward svc/mnist-model-service 8080:80 &
 
 # Test the service
 curl http://localhost:8080/health
@@ -82,15 +82,26 @@ curl -s http://localhost:8080/health | python3 -m json.tool
 
 ### 3.2 Test Predictions
 ```bash
-# Test with sample data
-curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": [5.1, 3.5, 1.4, 0.2]}' | python3 -m json.tool
+# Get sample data from the API
+curl -s http://localhost:8080/sample-data | python3 -m json.tool
 
-# Test with different sample
+# Test with a sample digit (this is a 28x28=784 pixel array)
 curl -X POST http://localhost:8080/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [6.2, 2.8, 4.8, 1.8]}' | python3 -m json.tool
+  -d @sample_request.json | python3 -m json.tool
+
+# Create a simple test with zeros (should predict digit 0 or be uncertain)
+python3 -c "
+import json
+zeros_image = [0.0] * 784  # 28x28 black image
+data = {'image': zeros_image}
+with open('zeros_test.json', 'w') as f:
+    json.dump(data, f)
+"
+
+curl -X POST http://localhost:8080/predict \
+  -H "Content-Type: application/json" \
+  -d @zeros_test.json | python3 -m json.tool
 ```
 
 ### 3.3 Use Test Script
@@ -155,7 +166,7 @@ kubectl delete -f deployment.yaml
 ### Scale Up
 ```bash
 # Scale to 3 replicas
-kubectl scale deployment iris-model --replicas=3
+kubectl scale deployment mnist-model --replicas=3
 
 # Watch pods come online
 kubectl get pods -w
@@ -167,7 +178,7 @@ for i in {1..10}; do curl -s http://localhost:8080/health | grep -o '"status":"[
 ### Scale Down
 ```bash
 # Scale back to 1 replica
-kubectl scale deployment iris-model --replicas=1
+kubectl scale deployment mnist-model --replicas=1
 ```
 
 ## Cleanup
