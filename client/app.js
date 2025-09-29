@@ -14,10 +14,10 @@ class MNISTDrawingApp {
     }
 
     initializeCanvas() {
-        // Set up canvas for drawing
-        this.ctx.fillStyle = 'white';
+        // Set up canvas for drawing (black background, white drawing)
+        this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.strokeStyle = 'black';
+        this.ctx.strokeStyle = 'white';
         this.ctx.lineWidth = 24; // pencil size
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
@@ -113,12 +113,12 @@ class MNISTDrawingApp {
         if (this.autoPredict) {
             this.predictionTimeout = setTimeout(() => {
                 this.makePrediction();
-            }, 25); // Choose prediction delay [milliseconds]
+            }, 250); // Choose prediction delay [milliseconds]
         }
     }
 
     clearCanvas() {
-        this.ctx.fillStyle = 'white';
+        this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.clearPrediction();
         document.getElementById('predictBtn').disabled = true;
@@ -149,7 +149,7 @@ class MNISTDrawingApp {
         tempCanvas.height = 28;
 
         // Draw scaled version
-        tempCtx.fillStyle = 'white';
+        tempCtx.fillStyle = 'black';
         tempCtx.fillRect(0, 0, 28, 28);
         tempCtx.drawImage(this.canvas, 0, 0, 280, 280, 0, 0, 28, 28);
 
@@ -160,17 +160,15 @@ class MNISTDrawingApp {
         // Convert to grayscale and normalize to 0-1 range
         const grayscale = [];
         for (let i = 0; i < pixels.length; i += 4) {
-            // Convert RGBA to grayscale, invert (black pen on white = white digit on black)
+            // Convert RGBA to grayscale (white drawing on black background)
             const r = pixels[i];
             const g = pixels[i + 1];
             const b = pixels[i + 2];
             const gray = (r + g + b) / 3;
 
-            // Invert: black drawing becomes white digit
-            const inverted = 255 - gray;
-
+            // Already in correct format: white digit on black background
             // Normalize to 0-1 range
-            const normalized = inverted / 255.0;
+            const normalized = gray / 255.0;
             grayscale.push(normalized);
         }
 
