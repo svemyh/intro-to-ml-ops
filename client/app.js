@@ -3,12 +3,15 @@ class MNISTDrawingApp {
     constructor() {
         this.canvas = document.getElementById('drawingCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.previewCanvas = document.getElementById('previewCanvas');
+        this.previewCtx = this.previewCanvas.getContext('2d');
         this.isDrawing = false;
         this.lastDrawTime = 0;
         this.autoPredict = true;
         this.predictionTimeout = null;
 
         this.initializeCanvas();
+        this.initializePreview();
         this.setupEventListeners();
         this.setupButtons();
     }
@@ -21,6 +24,13 @@ class MNISTDrawingApp {
         this.ctx.lineWidth = 24; // pencil size
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
+    }
+
+    initializePreview() {
+        // Set up preview canvas (28x28 scaled to 84x84)
+        this.previewCtx.fillStyle = 'black';
+        this.previewCtx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
+        this.previewCtx.imageSmoothingEnabled = false; // Keep pixelated look
     }
 
     setupEventListeners() {
@@ -104,6 +114,9 @@ class MNISTDrawingApp {
         this.lastDrawTime = Date.now();
         document.getElementById('predictBtn').disabled = false;
 
+        // Update the preview immediately
+        this.updatePreview();
+
         // Clear any existing prediction timeout
         if (this.predictionTimeout) {
             clearTimeout(this.predictionTimeout);
@@ -121,6 +134,7 @@ class MNISTDrawingApp {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.clearPrediction();
+        this.clearPreview();
         document.getElementById('predictBtn').disabled = true;
 
         // Clear any pending prediction
@@ -138,6 +152,47 @@ class MNISTDrawingApp {
         // Reset status
         this.updateStatus('Draw a digit to get started', '');
         document.getElementById('confidenceInfo').textContent = '';
+    }
+
+    clearPreview() {
+        this.previewCtx.fillStyle = 'black';
+        this.previewCtx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
+    }
+
+    updatePreview() {
+        // Get the 28x28 image data that will be sent to the API
+        const imageArray = this.canvasTo28x28();
+
+        // Clear preview canvas
+        this.previewCtx.fillStyle = 'black';
+        this.previewCtx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
+
+        // Draw the 28x28 image scaled up to 84x84 (3x scale)
+        const imageData = this.previewCtx.createImageData(84, 84);
+        const pixels = imageData.data;
+
+        for (let y = 0; y < 84; y++) {
+            for (let x = 0; x < 84; x++) {
+                // Map 84x84 coordinates to 28x28 image coordinates
+                const imgX = Math.floor(x / 3);
+                const imgY = Math.floor(y / 3);
+                const imgIndex = imgY * 28 + imgX;
+
+                // Get pixel value from the 28x28 array
+                const pixelValue = imageArray[imgIndex] || 0;
+
+                // Convert from 0-1 range to 0-255
+                const displayValue = Math.floor(pixelValue * 255);
+
+                const pixelIndex = (y * 84 + x) * 4;
+                pixels[pixelIndex] = displayValue;     // R
+                pixels[pixelIndex + 1] = displayValue; // G
+                pixels[pixelIndex + 2] = displayValue; // B
+                pixels[pixelIndex + 3] = 255;          // A
+            }
+        }
+
+        this.previewCtx.putImageData(imageData, 0, 0);
     }
 
     // Convert canvas to 28x28 grayscale image

@@ -126,6 +126,26 @@
             color: #666;
         }
 
+        .preview-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-area p {
+            margin: 10px 0 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #previewCanvas {
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background-color: black;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
         .api-config {
             margin-bottom: 20px;
             padding: 15px;
@@ -166,26 +186,31 @@
 <body>
     <div class="container">
         <h1>🔢 Digit Classifier</h1>
-        <div id="status" class="status">Draw a digit to get started</div>
-
-
+        <div style="text-align: center; color:grey">Draw a digit to get started</div>
+        <br>
+        
+        
         <div class="api-config">
             <label for="apiUrl">Modal API URL:</label>
             <input type="text" id="apiUrl" placeholder="https://username--mnist-classifier-predict.modal.run"
-                   value="http://localhost:8000/predict">
+            value="http://localhost:8000/predict">
             <small style="color: #666; display: block; margin-top: 5px;">
                 Use localhost from Part 1 testing, or the Modal URL from Part 4
             </small>
         </div>
-
+        
         <div class="drawing-area">
             <canvas id="drawingCanvas" width="280" height="280"></canvas>
             <div class="controls">
                 <button id="clearBtn">Clear Canvas</button>
                 <button id="predictBtn" disabled>Predict Now</button>
             </div>
+            <div class="preview-area">
+                <p>28x28 processed image sent to model:</p>
+                <canvas id="previewCanvas" width="84" height="84"></canvas>
+            </div>
         </div>
-
+        
         <div class="prediction-area">
             <div class="digits-display">
                 <div class="digit-box" data-digit="0">0</div>
@@ -199,8 +224,9 @@
                 <div class="digit-box" data-digit="8">8</div>
                 <div class="digit-box" data-digit="9">9</div>
             </div>
-
+            
             <div id="confidenceInfo" class="confidence-info"></div>
+            <div id="status" class="status"></div>
         </div>
     </div>
 
