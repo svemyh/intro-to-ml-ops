@@ -197,3 +197,13 @@ tensorboard_logs/
 *.kubeconfig
 secrets.yaml
 
+
+
+# latex
+slides/latex_presentation/main.aux
+slides/latex_presentation/main.log
+slides/latex_presentation/main.nav
+slides/latex_presentation/main.out
+slides/latex_presentation/main.snm
+slides/latex_presentation/main.toc
+slides/Modelo_de_Defesa_PROFMAT___UFES.zip

@@ -1,0 +1,151 @@
+\documentclass[11pt]{beamer}
+\usetheme{Madrid}
+\usefonttheme{serif}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\DeclareMathOperator{\sen}{sen}
+\DeclareMathOperator{\tg}{tg}
+
+\setbeamertemplate{caption}[numbered]
+
+\author[Sveinung Myhre]{Sveinung Myhre}
+\title{Intro to ML-ops}
+% Email contact
+\newcommand{\email}{sveinung.myhre@example.com}
+%\setbeamercovered{transparent}
+\setbeamertemplate{navigation symbols}{}
+%\logo{\includegraphics[scale=0.08]{imagens/logomarca_profmat.png}}
+\institute[]{ReLU NTNU}
+\date{September 30, 2025} 
+%\subject{}
+
+% ---------------------------------------------------------
+% Selecione um estilo de referência
+\bibliographystyle{apalike}
+
+%\bibliographystyle{abbrv}
+%\setbeamertemplate{bibliography item}{\insertbiblabel}
+% ---------------------------------------------------------
+
+% ---------------------------------------------------------
+% Incluir os slides nos quais as referências foram citadas
+%\usepackage[brazilian,hyperpageref]{backref}
+
+%\renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
+%\renewcommand{\backref}{}
+%\renewcommand*{\backrefalt}[4]{
+%	\ifcase #1 %
+%		Nenhuma citação no texto.%
+%	\or
+%		Citado na página #2.%
+%	\else
+%		Citado #1 vezes nas páginas #2.%
+%	\fi}%
+% ---------------------------------------------------------
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Introduction}
+Welcome to this brief introduction to ML-ops. Today we will cover:
+
+\begin{itemize}
+    \item Docker containers
+    \item Kubernetes
+    \item GPU glossary
+    \item Hands-on coding and pair-programming
+\end{itemize}
+\end{frame}
+
+\section{Docker Containers}
+
+\begin{frame}{Docker Containers}
+    \begin{block}{What are Docker Containers?}
+    Lightweight, portable environments that package applications with their dependencies.
+    \end{block}
+
+    \begin{block}{Key Benefits}
+    \begin{itemize}
+        \item Consistency across environments
+        \item Resource efficiency
+        \item Easy deployment and scaling
+    \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{Kubernetes}
+
+\begin{frame}{Kubernetes}
+    \begin{block}{Container Orchestration}
+    Kubernetes manages containerized applications across clusters of machines.
+    \end{block}
+
+    \begin{block}{Key Features}
+    \begin{itemize}
+        \item Automatic scaling
+        \item Load balancing
+        \item Self-healing
+        \item Rolling updates
+    \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{GPU Glossary}
+
+\begin{frame}{GPU Terminology for ML}
+    \begin{itemize}
+        \item \textbf{CUDA}: Parallel computing platform for NVIDIA GPUs
+        \item \textbf{Tensor Cores}: Specialized units for AI workloads
+        \item \textbf{VRAM}: Video memory for storing model parameters
+        \item \textbf{FP16/FP32}: Floating-point precision levels
+        \item \textbf{Multi-GPU}: Using multiple GPUs for training
+    \end{itemize}
+\end{frame}
+
+\section{Hands-on Coding}
+
+\begin{frame}{Pair Programming Session}
+    Time for hands-on practice!
+
+    \begin{itemize}
+        \item Setting up ML containers
+        \item Deploying with Kubernetes
+        \item GPU optimization
+        \item Best practices discussion
+    \end{itemize}
+\end{frame}
+
+\section{Questions \& Discussion}
+
+\begin{frame}
+
+\begin{center}
+    Thank you!
+
+    Questions?
+
+    \bigskip
+
+    \email
+\end{center}
+
+\end{frame}
+
+\end{document}
