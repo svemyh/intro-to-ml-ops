@@ -1,0 +1,36 @@
+# Simple pre-commit configuration
+repos:
+  # File size check
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=51200']  # 50MB limit
+
+  # Black code formatter
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=88']
+
+  # isort import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ['--profile=black', '--line-length=88']
+
+# Exclude slides and other non-code files
+exclude: |
+  (?x)^(
+      slides/.*|
+      .*\.pdf|
+      .*\.aux|
+      .*\.log|
+      .*\.nav|
+      .*\.out|
+      .*\.snm|
+      .*\.toc
+  )$
