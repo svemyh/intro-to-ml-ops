@@ -147,15 +147,16 @@
         }
 
         .api-config {
-            margin-bottom: 20px;
+            margin: 20px 0;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 4px;
             border: 1px solid #e9ecef;
+            text-align: center;
         }
 
         .api-config input {
-            width: 100%;
+            width: 80%;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -167,6 +168,26 @@
             margin-bottom: 5px;
             font-weight: bold;
             color: #333;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #007bff;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .step-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
         }
 
         .instructions {
@@ -186,47 +207,69 @@
 <body>
     <div class="container">
         <h1>🔢 Digit Classifier</h1>
-        <div style="text-align: center; color:grey">Draw a digit to get started</div>
-        <br>
         
-        
-        <div class="api-config">
-            <label for="apiUrl">Modal API URL:</label>
-            <input type="text" id="apiUrl" placeholder="https://username--mnist-classifier-predict.modal.run"
-            value="http://localhost:8000/predict">
-            <small style="color: #666; display: block; margin-top: 5px;">
-                Use localhost from Part 1 testing, or the Modal URL from Part 4
-            </small>
-        </div>
-        
-        <div class="drawing-area">
-            <canvas id="drawingCanvas" width="280" height="280"></canvas>
-            <div class="controls">
-                <button id="clearBtn">Clear Canvas</button>
-                <button id="predictBtn" disabled>Predict Now</button>
+        <!-- Step 1: Drawing Area -->
+        <div class="step-container">
+            <div class="step-title">1️⃣ Draw Your Digit</div>
+            <div class="drawing-area">
+                <canvas id="drawingCanvas" width="280" height="280"></canvas>
+                <div class="controls">
+                    <button id="clearBtn">Clear Canvas</button>
+                    <button id="predictBtn" disabled>Predict Now</button>
+                </div>
             </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- Step 2: 28x28 Preview -->
+        <div class="step-container">
+            <div class="step-title">2️⃣ Processed Image (28x28)</div>
             <div class="preview-area">
-                <p>28x28 processed image sent to model:</p>
                 <canvas id="previewCanvas" width="84" height="84"></canvas>
+                <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                    Preview of model input
+                </div>
             </div>
         </div>
-        
-        <div class="prediction-area">
-            <div class="digits-display">
-                <div class="digit-box" data-digit="0">0</div>
-                <div class="digit-box" data-digit="1">1</div>
-                <div class="digit-box" data-digit="2">2</div>
-                <div class="digit-box" data-digit="3">3</div>
-                <div class="digit-box" data-digit="4">4</div>
-                <div class="digit-box" data-digit="5">5</div>
-                <div class="digit-box" data-digit="6">6</div>
-                <div class="digit-box" data-digit="7">7</div>
-                <div class="digit-box" data-digit="8">8</div>
-                <div class="digit-box" data-digit="9">9</div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- Step 3: API Configuration -->
+        <div class="step-container">
+            <div class="step-title">3️⃣ API Endpoint</div>
+            <div class="api-config">
+                <label for="apiUrl">Backend URL:</label>
+                <input type="text" id="apiUrl" placeholder="https://username--mnist-classifier-predict.modal.run"
+                value="http://localhost:8000/predict">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Part 1: localhost | Part 4: Modal URL
+                </small>
             </div>
-            
-            <div id="confidenceInfo" class="confidence-info"></div>
-            <div id="status" class="status"></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- Step 4: Results -->
+        <div class="step-container">
+            <div class="step-title">4️⃣ Prediction Results</div>
+            <div class="prediction-area">
+                <div class="digits-display">
+                    <div class="digit-box" data-digit="0">0</div>
+                    <div class="digit-box" data-digit="1">1</div>
+                    <div class="digit-box" data-digit="2">2</div>
+                    <div class="digit-box" data-digit="3">3</div>
+                    <div class="digit-box" data-digit="4">4</div>
+                    <div class="digit-box" data-digit="5">5</div>
+                    <div class="digit-box" data-digit="6">6</div>
+                    <div class="digit-box" data-digit="7">7</div>
+                    <div class="digit-box" data-digit="8">8</div>
+                    <div class="digit-box" data-digit="9">9</div>
+                </div>
+
+                <div id="confidenceInfo" class="confidence-info"></div>
+                <div id="status" class="status"></div>
+            </div>
         </div>
     </div>
 
