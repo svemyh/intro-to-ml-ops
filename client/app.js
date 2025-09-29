@@ -18,7 +18,7 @@ class MNISTDrawingApp {
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.strokeStyle = 'black';
-        this.ctx.lineWidth = 8;
+        this.ctx.lineWidth = 24; // pencil size
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
     }
@@ -65,10 +65,6 @@ class MNISTDrawingApp {
 
         document.getElementById('predictBtn').addEventListener('click', () => {
             this.makePrediction();
-        });
-
-        document.getElementById('testBtn').addEventListener('click', () => {
-            this.loadTestSample();
         });
     }
 
@@ -117,7 +113,7 @@ class MNISTDrawingApp {
         if (this.autoPredict) {
             this.predictionTimeout = setTimeout(() => {
                 this.makePrediction();
-            }, 1250); // 1250ms delay as requested
+            }, 25); // Choose prediction delay [milliseconds]
         }
     }
 
@@ -259,98 +255,6 @@ class MNISTDrawingApp {
         statusDiv.className = `status ${type}`;
     }
 
-    // Load a sample digit for testing
-    async loadTestSample() {
-        try {
-            this.updateStatus('Loading test sample...', 'processing');
-
-            // Try to get sample data from the API
-            const apiUrl = document.getElementById('apiUrl').value.trim();
-            const baseUrl = apiUrl.replace('/predict', '');
-
-            let sampleData = null;
-            try {
-                const response = await fetch(`${baseUrl}/sample-data`);
-                if (response.ok) {
-                    const data = await response.json();
-                    sampleData = data.samples[0]; // Get first sample
-                }
-            } catch (e) {
-                console.log('Could not fetch sample data from API, using generated sample');
-            }
-
-            // Clear canvas first
-            this.clearCanvas();
-
-            if (sampleData && sampleData.image) {
-                // Use real sample from the API
-                this.drawImageOnCanvas(sampleData.image);
-                this.updateStatus(`Loaded sample digit ${sampleData.true_label}`, 'success');
-            } else {
-                // Generate a simple test pattern (number 3-like shape)
-                this.drawTestDigit();
-                this.updateStatus('Loaded test digit pattern', 'success');
-            }
-
-            // Enable predict button
-            document.getElementById('predictBtn').disabled = false;
-
-        } catch (error) {
-            console.error('Error loading test sample:', error);
-            this.updateStatus('Error loading test sample', 'error');
-        }
-    }
-
-    drawImageOnCanvas(imageArray) {
-        // Draw a 28x28 image array onto the 280x280 canvas
-        const imageData = this.ctx.createImageData(280, 280);
-        const pixels = imageData.data;
-
-        for (let y = 0; y < 280; y++) {
-            for (let x = 0; x < 280; x++) {
-                // Map canvas coordinates to 28x28 image coordinates
-                const imgX = Math.floor(x / 10);
-                const imgY = Math.floor(y / 10);
-                const imgIndex = imgY * 28 + imgX;
-
-                // Get pixel value from image array
-                const pixelValue = imageArray[imgIndex] || 0;
-
-                // Convert from 0-1 range to 0-255, invert for display
-                const displayValue = Math.floor((1 - pixelValue) * 255);
-
-                const pixelIndex = (y * 280 + x) * 4;
-                pixels[pixelIndex] = displayValue;     // R
-                pixels[pixelIndex + 1] = displayValue; // G
-                pixels[pixelIndex + 2] = displayValue; // B
-                pixels[pixelIndex + 3] = 255;          // A
-            }
-        }
-
-        this.ctx.putImageData(imageData, 0, 0);
-    }
-
-    drawTestDigit() {
-        // Draw a simple "3" pattern for testing
-        this.ctx.strokeStyle = 'black';
-        this.ctx.lineWidth = 8;
-        this.ctx.lineCap = 'round';
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(100, 80);
-        this.ctx.lineTo(180, 80);
-        this.ctx.moveTo(180, 80);
-        this.ctx.lineTo(180, 140);
-        this.ctx.moveTo(180, 140);
-        this.ctx.lineTo(140, 140);
-        this.ctx.moveTo(180, 140);
-        this.ctx.lineTo(180, 200);
-        this.ctx.moveTo(180, 200);
-        this.ctx.lineTo(100, 200);
-        this.ctx.stroke();
-
-        this.onDrawingChange();
-    }
 }
 
 // Initialize the app when page loads
