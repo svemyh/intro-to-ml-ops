@@ -15,6 +15,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 
 
@@ -81,6 +82,15 @@ app = FastAPI(
     description="A REST API for classifying handwritten digits (0-9) using a trained PyTorch neural network",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+# Add CORS middleware for frontend connectivity
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
