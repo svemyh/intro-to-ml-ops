@@ -1,0 +1,114 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\section{Kubernetes}
+
+\begin{frame}{Why I'm Teaching This: Kubernetes}
+    \textbf{What is Kubernetes?}
+    \begin{itemize}
+        \item Container orchestration platform
+        \item Manages containerized applications at scale
+        \item Handles deployment, scaling, and operations
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Why is it important?}
+    \begin{itemize}
+        \item Industry standard for container orchestration
+        \item Enables auto-scaling and self-healing
+        \item Essential for production ML deployments
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{The Scaling Problem}
+    \textbf{Scenario:} Joe and all his friends request a prediction simultaneously
+
+    \bigskip
+
+    \textbf{Traditional approach:}
+    \begin{itemize}
+        \item Create a queue?
+        \item Serve each request sequentially?
+        \item Users wait... and wait... and wait...
+    \end{itemize}
+
+    \bigskip
+
+    \begin{alertblock}{The Solution}
+        \textbf{Scale up the number of computers!} \\
+        But who manages this scaling? \textbf{Kubernetes!}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Kubernetes in Action}
+    \textbf{What Kubernetes provides:}
+    \begin{itemize}
+        \item \textbf{Auto-scaling:} Automatically add/remove containers
+        \item \textbf{Load balancing:} Distribute requests across instances
+        \item \textbf{Self-healing:} Restart failed containers
+        \item \textbf{Rolling updates:} Deploy new versions without downtime
+        \item \textbf{Service discovery:} Apps find each other automatically
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Architecture components:}
+    \begin{itemize}
+        \item Pods (smallest deployable units)
+        \item Services (network access)
+        \item Deployments (manage replicas)
+        \item Ingress (reverse proxy/load balancer)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{GPU + Kubernetes: The Future}
+    \textbf{Why GPUs + Kubernetes matter:}
+
+    \bigskip
+
+    \textbf{Massive investments:}
+    \begin{itemize}
+        \item \$500B on OpenAI Stargate project alone
+        \item McKinsey: \$5.2 trillion needed for AI data centers by 2030
+        \item OpenAI scaling to 7,500+ Kubernetes nodes
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Career implications:}
+    \begin{itemize}
+        \item Growing demand for cloud infrastructure consultants
+        \item Kubernetes + GPU expertise is highly valued
+        \item Critical skill for modern ML engineering
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Source:} \url{https://openai.com/index/scaling-kubernetes-to-7500-nodes/}
+\end{frame}
+
+\begin{frame}{GPU Glossary}
+    \textbf{Essential GPU terminology for ML:}
+
+    \begin{itemize}
+        \item \textbf{CUDA:} NVIDIA's parallel computing platform
+        \item \textbf{Tensor Cores:} Specialized AI acceleration units
+        \item \textbf{VRAM:} Video memory for model parameters
+        \item \textbf{FP16/FP32:} Floating-point precision levels
+        \item \textbf{Multi-GPU:} Training across multiple GPUs
+        \item \textbf{GPU Memory:} Often the bottleneck in ML workloads
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Excellent resource:} Charles Frye's GPU Glossary \\
+    \url{https://modal.com/gpu-glossary}
+
+    \bigskip
+
+    \textit{Credit: Charles Frye for this comprehensive resource}
+\end{frame}
+
+\end{document}

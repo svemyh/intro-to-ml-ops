@@ -1,0 +1,105 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\section{Cloud Deployment}
+
+\begin{frame}{Cloud Deployment Strategy}
+    \textbf{The complete journey:} PC → Container → Orchestration → Cloud
+
+    \bigskip
+
+    \textbf{Key components we've covered:}
+    \begin{itemize}
+        \item \textbf{Docker:} Containerize your ML model
+        \item \textbf{Kubernetes:} Orchestrate at scale
+        \item \textbf{Cloud platforms:} AWS, GCP, Azure
+        \item \textbf{Auto-scaling:} Handle variable loads
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Architecture pattern:}
+    \begin{itemize}
+        \item Load balancer/Reverse proxy
+        \item Multiple container instances
+        \item Auto-scaling based on demand
+        \item Health checks and self-healing
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Deployment Architecture}
+    \textbf{Typical production setup:}
+
+    \begin{center}
+        \texttt{User Request → Load Balancer → Kubernetes Cluster → ML Model Pods}
+    \end{center}
+
+    \bigskip
+
+    \textbf{Components:}
+    \begin{itemize}
+        \item \textbf{Reverse Proxy:} Nginx, Traefik, or cloud load balancer
+        \item \textbf{Ingress Controller:} Routes traffic to services
+        \item \textbf{Service Mesh:} Advanced traffic management (optional)
+        \item \textbf{Monitoring:} Prometheus, Grafana for observability
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Scaling triggers:}
+    \begin{itemize}
+        \item CPU/Memory utilization
+        \item Request queue length
+        \item Custom metrics (inference time, etc.)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Cloud Provider Options}
+    \textbf{Major cloud platforms for ML deployment:}
+
+    \bigskip
+
+    \begin{columns}
+        \begin{column}{0.33\textwidth}
+            \textbf{AWS}
+            \begin{itemize}
+                \item EKS (Kubernetes)
+                \item SageMaker
+                \item EC2 with GPUs
+                \item Lambda (serverless)
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.33\textwidth}
+            \textbf{Google Cloud}
+            \begin{itemize}
+                \item GKE (Kubernetes)
+                \item Vertex AI
+                \item Compute Engine
+                \item Cloud Run
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.33\textwidth}
+            \textbf{Azure}
+            \begin{itemize}
+                \item AKS (Kubernetes)
+                \item Azure ML
+                \item Virtual Machines
+                \item Container Instances
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+    \bigskip
+
+    \textbf{Key considerations:}
+    \begin{itemize}
+        \item GPU availability and pricing
+        \item Regional data requirements
+        \item Integration with existing systems
+    \end{itemize}
+\end{frame}
+
+\end{document}

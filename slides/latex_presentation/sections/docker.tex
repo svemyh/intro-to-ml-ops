@@ -1,0 +1,125 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\section{Docker \& Containerization}
+
+\begin{frame}{Why I'm Teaching This: Docker}
+    \textbf{What is Docker?}
+    \begin{itemize}
+        \item Containerization platform
+        \item Package applications with dependencies
+        \item Consistent environments across machines
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Why is it important?}
+    \begin{itemize}
+        \item Eliminates "works on my machine" problems
+        \item Essential for modern cloud deployments
+        \item Industry standard for ML model deployment
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Evolution: Machine → VM → Container}
+    \begin{columns}
+        \begin{column}{0.33\textwidth}
+            \textbf{Physical Machine}
+            \begin{itemize}
+                \item Heavy resource usage
+                \item OS dependency
+                \item Difficult scaling
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.33\textwidth}
+            \textbf{Virtual Machine}
+            \begin{itemize}
+                \item Full OS overhead
+                \item Better isolation
+                \item Still resource heavy
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.33\textwidth}
+            \textbf{Container}
+            \begin{itemize}
+                \item Shared kernel
+                \item Lightweight
+                \item Fast startup
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+    \bigskip
+
+    \textbf{Contrast:} Docker containers vs Python virtual environments
+    \begin{itemize}
+        \item venv: Python packages only
+        \item Docker: Entire runtime environment
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Essential Docker Commands}
+    \textbf{Most important commands to know:}
+
+    \begin{itemize}
+        \item \texttt{docker build -t myapp .} - Build image
+        \item \texttt{docker run myapp} - Run container
+        \item \texttt{docker ps} - List running containers
+        \item \texttt{docker images} - List available images
+        \item \texttt{docker pull ubuntu} - Download image
+        \item \texttt{docker stop <container-id>} - Stop container
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Key files:}
+    \begin{itemize}
+        \item \texttt{Dockerfile} - Build instructions
+        \item \texttt{.dockerignore} - Files to exclude
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Docker Registry Services}
+    \textbf{Container registries} store and distribute Docker images
+
+    \bigskip
+
+    \textbf{Popular services:}
+    \begin{itemize}
+        \item \textbf{Docker Hub} - Free public registry
+        \item \textbf{AWS ECR} - Amazon's container registry
+        \item \textbf{Google Container Registry}
+        \item \textbf{GitHub Container Registry}
+    \end{itemize}
+
+    \bigskip
+
+    \textbf{Analogy:} Docker Hub is to Docker as GitHub is to Git
+    \begin{itemize}
+        \item Git/Docker: Version control tools
+        \item GitHub/Docker Hub: Cloud hosting services
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Hands-on Approach}
+    \begin{alertblock}{Time Constraint Strategy}
+        Instead of traditional pair-programming:
+    \end{alertblock}
+
+    \textbf{Our approach:}
+    \begin{enumerate}
+        \item \textbf{Run the code} - Execute provided examples
+        \item \textbf{Read what it does} - Understand the implementation
+        \item \textbf{Explain to each other} - Discuss with peers
+        \item \textbf{Ask AI assistants} - Use ChatGPT/LLMs for clarification
+    \end{enumerate}
+
+    \bigskip
+
+    \textbf{Goal:} Maximum learning in minimal time!
+\end{frame}
+
+\end{document}
