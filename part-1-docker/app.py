@@ -51,7 +51,9 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting up the MNIST Classification API service...")
 
     # Load the trained model
-    model_path = "mnist_model.pth"
+    script_dir = os.path.dirname(os.path.abspath(_file_))
+    model_path = os.path.join(script_dir, "mnist_model.pth")
+
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model file '{model_path}' not found!")
 
@@ -136,24 +138,6 @@ class PredictionResponse(BaseModel):
     image_shape: List[int] = Field(description="Shape of processed image [28, 28]")
 
 
-class HealthResponse(BaseModel):
-    """Response model for health check."""
-
-    status: str = Field(description="Service status")
-    model_loaded: bool = Field(description="Whether the model is loaded")
-    model_info: Dict[str, Any] = Field(description="Model metadata")
-
-
-@app.get("/health", response_model=HealthResponse)
-async def health_check():
-    """Health check endpoint to verify the service is running."""
-    return HealthResponse(
-        status="healthy",
-        model_loaded=model is not None,
-        model_info=model_info.get("model_info", {}),
-    )
-
-
 @app.get("/")
 async def root():
     """Root endpoint with basic information."""
@@ -234,4 +218,4 @@ async def get_sample_data():
 if __name__ == "__main__":
     # Run the server
     print("🔢 Starting MNIST Digit Classification API...")
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
+    uvicorn.run("app:app", host="0.0.0.0", port=8001, reload=True, log_level="info")
