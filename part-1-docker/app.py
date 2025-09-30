@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting up the MNIST Classification API service...")
 
     # Load the trained model
-    script_dir = os.path.dirname(os.path.abspath(_file_))
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(script_dir, "mnist_model.pth")
 
     if not os.path.exists(model_path):
