@@ -218,4 +218,4 @@ async def get_sample_data():
 if __name__ == "__main__":
     # Run the server
     print("🔢 Starting MNIST Digit Classification API...")
-    uvicorn.run("app:app", host="0.0.0.0", port=8001, reload=True, log_level="info")
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
