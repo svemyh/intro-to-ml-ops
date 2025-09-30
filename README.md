@@ -1,11 +1,8 @@
-# MLOps Workshop: From Kubernetes to Modal
-
-> **The Journey from Complex to Simple**
-> Experience the full spectrum of ML deployment - from traditional infrastructure to modern serverless platforms
+# MLOps Workshop: Local to cloud
 
 ## 🎯 Workshop Overview
 
-This hands-on workshop takes you through the evolution of ML deployment strategies. You'll start with the "proper" traditional approach using FastAPI, Docker, and Kubernetes, then experience the dramatic simplification possible with modern serverless platforms like Modal.
+This hands-on workshop takes you through some of the classic tooling used for ML deployment strategies. You'll start with a "proper" traditional approach using FastAPI, Docker, and Kubernetes, then experience the dramatic simplification possible with modern serverless platforms like Modal.
 
 **Duration:** 2-3 hours
 **Audience:** ML practitioners with a trained model
@@ -40,7 +37,7 @@ This hands-on workshop takes you through the evolution of ML deployment strategi
 
 [**→ Start Part 2**](./part-2-kubernetes/)
 
-### ☁️ Part 3: Cloud Deployment (30 min - Optional)
+### ☁️ (Optional Part 3): Cloud Deployment (30 min)
 **Goal:** Deploy to managed Kubernetes in the cloud
 
 - **For fast finishers:** GKE, EKS, or AKS deployment
@@ -49,7 +46,7 @@ This hands-on workshop takes you through the evolution of ML deployment strategi
 
 [**→ Start Part 3**](./part-3-cloud/)
 
-### 🚀 Part 4: The Modal Alternative (20 min)
+### 🚀 Part 4: The Modal Alternative (15 min)
 **Goal:** Replace all previous complexity with ~20 lines of Python
 
 - **The Big Reveal:** Serverless deployment with Modal
@@ -68,30 +65,6 @@ By the end of this workshop, you will:
 - ✅ **Make informed decisions** - When to use each approach
 - ✅ **Deploy production-ready models** - Both traditional and modern ways
 
-## 🛠️ What You'll Build
-
-### Traditional Stack (Parts 1-3)
-```
-[FastAPI App] → [Docker Container] → [Kubernetes Pod] → [Cloud LoadBalancer]
-```
-
-**Files Created:**
-- `app.py` - FastAPI application with model serving
-- `Dockerfile` - Container configuration
-- `deployment.yaml` - Kubernetes manifests
-- Multiple configuration and test files
-
-**Complexity:** ~200 lines across 8+ files
-
-### Modern Stack (Part 4)
-```
-[Modal Function] → [Auto-scaling Infrastructure] → [Global HTTPS Endpoints]
-```
-
-**Files Created:**
-- `app_modal.py` - Complete serverless application
-
-**Complexity:** ~20 lines in 1 file
 
 ## 📊 Comparison
 
@@ -134,30 +107,6 @@ python3 create_sample_model.py
 # Follow the journey through each part...
 ```
 
-## 📁 Repository Structure
-
-```
-intro-to-mlops/
-├── README.md                 # This file
-├── plan.md                   # Implementation plan
-├── part-0-prerequisites/     # Environment setup + model creation
-├── part-1-docker/           # FastAPI + Docker
-├── part-2-kubernetes/       # K8s deployment
-├── part-3-cloud/           # Cloud deployment (optional)
-└── part-4-modal/           # Serverless alternative
-```
-
-## 🎉 Success Stories
-
-> *"I went from spending 60% of my time on infrastructure to 100% on ML models"*
-> — Workshop Participant
-
-> *"The Modal deployment literally took 30 seconds vs. 2 hours for Kubernetes"*
-> — ML Engineer
-
-> *"Finally understood when to use each approach - game changer for our team decisions"*
-> — Tech Lead
-
 ## 🤝 Contributing
 
 Found an issue or want to improve the workshop?
@@ -167,12 +116,4 @@ Found an issue or want to improve the workshop?
 
 ## 📄 License
 
-This workshop is open source and free to use for educational purposes.
-
----
-
-**Ready to start your MLOps journey?**
-
-👉 **[Begin with Part 0: Prerequisites](./part-0-prerequisites/)**
-
-*Experience the evolution from complex to simple, and make informed decisions about your ML deployment strategy.*
+[License](LICENSE)
