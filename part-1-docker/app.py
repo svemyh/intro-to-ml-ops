@@ -218,4 +218,16 @@ async def get_sample_data():
 if __name__ == "__main__":
     # Run the server
     print("🔢 Starting MNIST Digit Classification API...")
+
+    # Get the path to the client HTML file using relative paths
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    client_html_path = os.path.join(script_dir, "..", "client", "index.html")
+
+    if os.path.exists(client_html_path):
+        client_url = f"file://{os.path.abspath(client_html_path)}"
+        print(f"🌐 Open the client interface: {client_url}")
+        print("📝 Or copy this link to your browser to test the digit classifier!")
+    else:
+        print("⚠️  Client HTML file not found at ../client/index.html")
+
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
