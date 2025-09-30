@@ -207,3 +207,9 @@ slides/latex_presentation/main.out
 slides/latex_presentation/main.snm
 slides/latex_presentation/main.toc
 slides/Modelo_de_Defesa_PROFMAT___UFES.zip
+
+
+part-1-docker/diagrams.md
+part-2-kubernetes/diagrams.md
+part-3-cloud/diagrams.md
+part-4-modal/diagrams.md
