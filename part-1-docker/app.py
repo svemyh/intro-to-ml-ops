@@ -125,6 +125,21 @@ async def root():
     return {"message": "MNIST Digit Classification API"}
 
 
+@app.get("/health")
+async def health():
+    """Health check endpoint for monitoring and Kubernetes probes."""
+    global model
+
+    if model is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    return {
+        "status": "healthy",
+        "model_loaded": model is not None,
+        "service": "MNIST Digit Classification API",
+    }
+
+
 def preprocess_image(image_data: List[float]) -> torch.Tensor:
     """Preprocess image data for model inference."""
     image_array = np.array(image_data, dtype=np.float32).reshape(28, 28)
