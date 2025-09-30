@@ -10,19 +10,17 @@ dependencies = [
     "numpy>=1.21.0",
     "scikit-learn",
     "joblib",
-
     # For API and web server (Part 1)
     "fastapi==0.104.1",
     "uvicorn[standard]==0.24.0",
     "pydantic==2.5.0",
     "python-multipart==0.0.6",
-
     # For testing and utilities
     "matplotlib>=3.3.0",
     "requests",
-
     # For the serverless deployment example (Part 4)
     "modal",
+    "web-browser>=0.0.1",
 ]
 
 [tool.black]
