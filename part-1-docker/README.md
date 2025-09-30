@@ -1,13 +1,10 @@
 # Part 1: FastAPI + Docker Deployment
 
-**Time Required:** 40 minutes
 **Goal:** Create a FastAPI wrapper for your ML model, test it locally, then containerize it
 
 ## What You'll Learn
 - How to create a REST API around an ML model using FastAPI
 - How to containerize Python applications with Docker
-- Testing HTTP endpoints with curl
-- Docker best practices for ML applications
 
 ## Step 1: Run FastAPI App Locally
 
@@ -28,7 +25,7 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
-You should see:
+You should see somethign like:
 ```
 INFO:     Started server process [12345]
 INFO:     Waiting for application startup.
