@@ -12,15 +12,14 @@
 
 ## Prerequisites
 - Completed Part 1 (Docker image built)
-- k3d installed and working
-- kubectl installed
+- `k3d` & `kubectl` installed and working [Installation guide](SETUP.md)
 
 ## Step 1: Create Local Kubernetes Cluster (10 minutes)
 
 ### 1.1 Create k3d Cluster
 ```bash
 # Create a local Kubernetes cluster
-k3d cluster create mlops-demo --port "8080:80@loadbalancer"
+k3d cluster create mlops-demo --port "8090:80@loadbalancer"
 
 # Verify cluster is running
 kubectl cluster-info
@@ -67,47 +66,12 @@ kubectl logs -l app=mnist-model
 ### 2.3 Port Forward to Access Service
 ```bash
 # Forward local port to service
-kubectl port-forward svc/mnist-model-service 8080:80 &
+kubectl port-forward svc/mnist-model-service 8091:80 &
 
 # Test the service
-curl http://localhost:8080/health
+curl http://localhost:8090/health
 ```
 
-## Step 3: Test the Kubernetes Deployment (10 minutes)
-
-### 3.1 Run Health Check
-```bash
-curl -s http://localhost:8080/health | python3 -m json.tool
-```
-
-### 3.2 Test Predictions
-```bash
-# Get sample data from the API
-curl -s http://localhost:8080/sample-data | python3 -m json.tool
-
-# Test with a sample digit (this is a 28x28=784 pixel array)
-curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d @sample_request.json | python3 -m json.tool
-
-# Create a simple test with zeros (should predict digit 0 or be uncertain)
-python3 -c "
-import json
-zeros_image = [0.0] * 784  # 28x28 black image
-data = {'image': zeros_image}
-with open('zeros_test.json', 'w') as f:
-    json.dump(data, f)
-"
-
-curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d @zeros_test.json | python3 -m json.tool
-```
-
-### 3.3 Use Test Script
-```bash
-./test_k8s.sh
-```
 
 ## Understanding Kubernetes Components
 
@@ -143,70 +107,20 @@ curl -X POST http://localhost:8080/predict \
 kubectl get all
 
 # Describe deployment
-kubectl describe deployment iris-model
+kubectl describe deployment mnist-model
 
 # View pod logs
-kubectl logs -l app=iris-model -f
+kubectl logs -l app=mnist-model -f
 
 # Get detailed pod information
-kubectl describe pods -l app=iris-model
+kubectl describe pods -l app=mnist-model
 
 # Check service endpoints
-kubectl get endpoints iris-model-service
+kubectl get endpoints mnist-model-service
 
 # Scale deployment
-kubectl scale deployment iris-model --replicas=3
+kubectl scale deployment mnist-model --replicas=3
 
 # Delete resources
 kubectl delete -f deployment.yaml
 ```
-
-## Scaling Demo (Optional)
-
-### Scale Up
-```bash
-# Scale to 3 replicas
-kubectl scale deployment mnist-model --replicas=3
-
-# Watch pods come online
-kubectl get pods -w
-
-# Test load balancing
-for i in {1..10}; do curl -s http://localhost:8080/health | grep -o '"status":"[^"]*"'; done
-```
-
-### Scale Down
-```bash
-# Scale back to 1 replica
-kubectl scale deployment mnist-model --replicas=1
-```
-
-## Cleanup
-
-```bash
-# Stop port forwarding (Ctrl+C if running in foreground)
-# Or kill the background process
-
-# Delete Kubernetes resources
-kubectl delete -f deployment.yaml
-
-# Delete k3d cluster
-k3d cluster delete mlops-demo
-```
-
-## Key Takeaways
-
-- **Kubernetes provides**: Container orchestration, service discovery, load balancing, health checks
-- **Complexity**: Multiple YAML files, networking concepts, debugging challenges
-- **Benefits**: Scalability, reliability, production-ready infrastructure
-- **Trade-offs**: Learning curve, operational overhead for simple applications
-
-## Next Steps
-Your ML model is now running on Kubernetes! In Part 3 (optional), we'll deploy to cloud Kubernetes services. In Part 4, we'll see how Modal eliminates all this complexity.
-
-## Architecture Overview
-```
-[Client] → [k3d LoadBalancer] → [Service] → [Deployment] → [Pods] → [Containers]
-```
-
-Each layer adds functionality but also complexity - this is what modern platforms like Modal abstract away!

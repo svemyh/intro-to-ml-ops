@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test script for Kubernetes deployed Iris Classification API
 
-BASE_URL=${1:-"http://localhost:8080"}
+BASE_URL=${1:-"http://localhost:8090"}
 echo "🧪 Testing Kubernetes deployed API at $BASE_URL"
 
 # Colors for output
@@ -22,7 +22,7 @@ fi
 echo -e "\n${BLUE}🔍 Checking Kubernetes cluster status...${NC}"
 if ! kubectl cluster-info &> /dev/null; then
     echo -e "${RED}❌ No Kubernetes cluster found. Please create a cluster first:${NC}"
-    echo "k3d cluster create mlops-demo --port \"8080:80@loadbalancer\""
+    echo "k3d cluster create mlops-demo --port \"8090:80@loadbalancer\""
     exit 1
 fi
 
@@ -104,7 +104,7 @@ else
     echo -e "   ${RED}❌ Health check failed: HTTP $http_code${NC}"
     if [ "$http_code" = "000" ]; then
         echo -e "   ${YELLOW}💡 Tip: Make sure port-forward is running:${NC}"
-        echo "        kubectl port-forward svc/iris-model-service 8080:80"
+        echo "        kubectl port-forward svc/mnist-model-service 8090:80"
     fi
     exit 1
 fi
@@ -178,4 +178,4 @@ echo -e "\n${BLUE}💡 Useful commands:${NC}"
 echo "   • View pods: kubectl get pods -l app=mnist-model"
 echo "   • View logs: kubectl logs -l app=mnist-model -f"
 echo "   • Scale up: kubectl scale deployment mnist-model --replicas=3"
-echo "   • Port forward: kubectl port-forward svc/mnist-model-service 8080:80"
+echo "   • Port forward: kubectl port-forward svc/mnist-model-service 8090:80"
