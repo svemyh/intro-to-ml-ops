@@ -17,7 +17,7 @@ cp ../part-0-prerequisites/sample_data.json .
 
 ### 1.2 Install Dependencies
 ```bash
-pip install -r requirements.txt
+uv sync # (execute in the directory notebooks/town_hall_02)
 ```
 
 ### 1.3 Run the FastAPI Application
