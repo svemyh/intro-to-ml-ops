@@ -20,7 +20,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 
 
-# Define the same model architecture as in training
 class MNISTModel(nn.Module):
     """Simple neural network for MNIST digit classification."""
 
@@ -49,26 +48,15 @@ async def lifespan(app: FastAPI):
     """Load the model on startup and clean up on shutdown."""
     global model, model_info
 
-    print("🚀 Starting up the MNIST Classification API service...")
-
-    # Load the trained model
     script_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(script_dir, "mnist_model.pth")
 
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model file '{model_path}' not found!")
+    checkpoint = torch.load(model_path, map_location="cpu")
+    model = MNISTModel()
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
+    print(f"📊 Model accuracy: {checkpoint.get('test_accuracy', 'N/A'):.2f}%")
 
-    try:
-        checkpoint = torch.load(model_path, map_location="cpu")
-        model = MNISTModel()
-        model.load_state_dict(checkpoint["model_state_dict"])
-        model.eval()
-        print(f"✅ Model loaded successfully from {model_path}")
-        print(f"📊 Model accuracy: {checkpoint.get('test_accuracy', 'N/A'):.2f}%")
-    except Exception as e:
-        raise RuntimeError(f"Failed to load model: {str(e)}")
-
-    # Load model metadata
     if os.path.exists("sample_data.json"):
         with open("sample_data.json", "r") as f:
             model_info = json.load(f)
@@ -76,21 +64,13 @@ async def lifespan(app: FastAPI):
 
     yield  # This is where the application runs
 
-    print("🛑 Shutting down the MNIST Classification API service...")
 
+app = FastAPI(lifespan=lifespan)
 
-# Create FastAPI application with lifecycle management
-app = FastAPI(
-    title="MNIST Digit Classification API",
-    description="A REST API for classifying handwritten digits (0-9) using a trained PyTorch neural network",
-    version="1.0.0",
-    lifespan=lifespan,
-)
-
-# Add CORS middleware for frontend connectivity
+# (this is a network security setting)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend domain
+    allow_origins=["*"],  # In production, specify this as your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -142,25 +122,17 @@ class PredictionResponse(BaseModel):
 @app.get("/")
 async def root():
     """Root endpoint with basic information."""
-    return {
-        "message": "MNIST Digit Classification API",
-        "version": "1.0.0",
-        "model": "Neural Network (PyTorch)",
-        "task": "Handwritten digit recognition (0-9)",
-        "endpoints": {"health": "/health", "predict": "/predict", "docs": "/docs"},
-    }
+    return {"message": "MNIST Digit Classification API"}
 
 
 def preprocess_image(image_data: List[float]) -> torch.Tensor:
     """Preprocess image data for model inference."""
-    # Convert to numpy array and reshape to 28x28
     image_array = np.array(image_data, dtype=np.float32).reshape(28, 28)
 
     # Convert to tensor and add batch and channel dimensions
     image_tensor = torch.tensor(image_array).unsqueeze(0).unsqueeze(0)  # [1, 1, 28, 28]
 
-    # Apply MNIST normalization
-    normalized_image = (image_tensor - 0.1307) / 0.3081
+    normalized_image = (image_tensor - 0.1307) / 0.3081  # MNIST normalization
 
     return normalized_image
 
@@ -168,15 +140,9 @@ def preprocess_image(image_data: List[float]) -> torch.Tensor:
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
     """Make a digit prediction using the trained model."""
-
-    if model is None:
-        raise HTTPException(status_code=500, detail="Model not loaded")
-
     try:
-        # Preprocess the image
         processed_image = preprocess_image(request.image)
 
-        # Make prediction
         with torch.no_grad():
             output = model(processed_image)
             probabilities = F.softmax(output, dim=1)
@@ -195,32 +161,9 @@ async def predict(request: PredictionRequest):
         raise HTTPException(status_code=400, detail=f"Prediction failed: {str(e)}")
 
 
-@app.get("/model-info")
-async def model_info_endpoint():
-    """Get detailed information about the model."""
-    if not model_info:
-        raise HTTPException(status_code=404, detail="Model info not available")
-
-    return model_info
-
-
-@app.get("/sample-data")
-async def get_sample_data():
-    """Get sample data for testing the API."""
-    if not model_info:
-        raise HTTPException(status_code=404, detail="Sample data not available")
-
-    return {
-        "samples": model_info.get("sample_inputs", [])[:3],  # Return first 3 samples
-        "usage": "Use the 'image' field from any sample as input to /predict endpoint",
-    }
-
-
 if __name__ == "__main__":
-    # Run the server
     print("🔢 Starting MNIST Digit Classification API...")
 
-    # Get the path to the client HTML file using relative paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
     client_html_path = os.path.join(script_dir, "..", "client", "index.html")
 
@@ -231,10 +174,6 @@ if __name__ == "__main__":
         print("📝 Or copy this link to your browser to test the digit classifier!")
         print("###############################################")
 
-        # Auto-open in browser
-        webbrowser.open(client_url)
-        print("🚀 Opening client interface in your default browser...")
-    else:
-        print("⚠️  Client HTML file not found at ../client/index.html")
+        webbrowser.open(client_url)  # Auto-open
 
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
