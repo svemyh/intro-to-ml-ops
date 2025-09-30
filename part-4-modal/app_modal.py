@@ -11,14 +11,8 @@ import modal
 # Create Modal app
 app = modal.App("mnist-classifier")
 
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(script_dir, "mnist_model.pth")
-
-client_html_path = os.path.join(script_dir, "..", "client", "index.html")
-if os.path.exists(client_html_path):
-    client_url = f"file://{os.path.abspath(client_html_path)}"
-
 
 # Define the runtime environment
 image = (
@@ -55,13 +49,42 @@ class MNISTModel:
         return x
 
 
-@app.function(image=image)
-@modal.web_endpoint(method="POST", label="predict")
-def predict(item: dict):
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_dotenv()],
+    min_containers=1,
+    timeout=60 * 60,  # [seconds]
+)
+@modal.asgi_app()
+def start():
+    import fastapi
     import numpy as np
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
+    from fastapi import Body, FastAPI, HTTPException, Request
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import JSONResponse
+
+    fast_api_app = FastAPI()
+    origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "http://localhost:8002",
+        "https://talk.iwy.ai",
+        "https://app.iwy.ai",
+    ]
+    fast_api_app.add_middleware(
+        CORSMiddleware,
+        # allow_origins=origins,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     # Recreate model architecture
     class MNISTModel(nn.Module):
@@ -80,54 +103,54 @@ def predict(item: dict):
             return x
 
     # Load the model (cached after first call)
-    checkpoint = torch.load("/root/mnist_model.pth", map_location="cpu")
+    checkpoint = torch.load(model_path, map_location="cpu")
     model = MNISTModel()
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
-    # Validate input
-    image_data = item.get("image", [])
+    @fast_api_app.post("/predict")
+    def predict(item: dict):
+        image_data = item.get("image", [])
 
-    # Handle both flat and 2D input formats
-    if isinstance(image_data[0], list) if image_data else False:  # 2D format
-        if len(image_data) != 28 or any(len(row) != 28 for row in image_data):
-            return {"error": "2D image must be 28x28 pixels"}
-        image_data = [pixel for row in image_data for pixel in row]  # Flatten
+        # Handle both flat and 2D input formats
+        if isinstance(image_data[0], list) if image_data else False:  # 2D format
+            if len(image_data) != 28 or any(len(row) != 28 for row in image_data):
+                return {"error": "2D image must be 28x28 pixels"}
+            image_data = [pixel for row in image_data for pixel in row]  # Flatten
 
-    if len(image_data) != 784:
-        return {"error": "Image must have exactly 784 pixel values (28x28)"}
+        if len(image_data) != 784:
+            return {"error": "Image must have exactly 784 pixel values (28x28)"}
 
-    try:
-        # Convert to tensor and add batch/channel dimensions
-        image_tensor = torch.tensor(image_data, dtype=torch.float32).reshape(
-            1, 1, 28, 28
-        )
+        try:
+            # Convert to tensor and add batch/channel dimensions
+            image_tensor = torch.tensor(image_data, dtype=torch.float32).reshape(
+                1, 1, 28, 28
+            )
 
-        # Apply MNIST normalization
-        normalized_image = (image_tensor - 0.1307) / 0.3081
+            # Apply MNIST normalization
+            normalized_image = (image_tensor - 0.1307) / 0.3081
 
-        # Make prediction
-        with torch.no_grad():
-            output = model(normalized_image)
-            probabilities = F.softmax(output, dim=1)
-            prediction = output.argmax(dim=1).item()
-            confidence = probabilities[0][prediction].item()
+            # Make prediction
+            with torch.no_grad():
+                output = model(normalized_image)
+                probabilities = F.softmax(output, dim=1)
+                prediction = output.argmax(dim=1).item()
+                confidence = probabilities[0][prediction].item()
 
-        return {
-            "prediction": prediction,
-            "class_name": str(prediction),
-            "confidence": confidence,
-            "probabilities": probabilities[0].tolist(),
-        }
-    except Exception as e:
-        return {"error": f"Prediction failed: {str(e)}"}
+            return {
+                "prediction": prediction,
+                "class_name": str(prediction),
+                "confidence": confidence,
+                "probabilities": probabilities[0].tolist(),
+            }
+        except Exception as e:
+            return {"error": f"Prediction failed: {str(e)}"}
+
+    return fast_api_app
 
 
 if __name__ == "__main__":
     print("This is a Modal app. Deploy it with:")
     print("modal serve app_modal.py")
-    print(
-        "\nAfter deployment, you'll get an URL which is exposed to the internet, on the form:"
-    )
+    print("You'll get a publically exposed URL on the form:")
     print("• https://username--predict-dev.modal.run")
-    webbrowser.open(client_html_path)
