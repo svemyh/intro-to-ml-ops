@@ -1,3 +1,30 @@
+[project]
+name = "intro-to-mlops"
+version = "0.1.0"
+description = "MLOps Workshop: From local to cloud deployment."
+requires-python = ">=3.10"
+dependencies = [
+    # For model creation and inference (Part 0, 1, 4)
+    "torch>=1.9.0",
+    "torchvision>=0.10.0",
+    "numpy>=1.21.0",
+    "scikit-learn",
+    "joblib",
+
+    # For API and web server (Part 1)
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+    "pydantic==2.5.0",
+    "python-multipart==0.0.6",
+
+    # For testing and utilities
+    "matplotlib>=3.3.0",
+    "requests",
+
+    # For the serverless deployment example (Part 4)
+    "modal",
+]
+
 [tool.black]
 line-length = 88
 target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
