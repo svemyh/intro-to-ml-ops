@@ -6,6 +6,7 @@ This creates a REST API endpoint for making predictions on handwritten digit ima
 
 import json
 import os
+import webbrowser
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Union
 
@@ -225,8 +226,14 @@ if __name__ == "__main__":
 
     if os.path.exists(client_html_path):
         client_url = f"file://{os.path.abspath(client_html_path)}"
+        print("###############################################")
         print(f"🌐 Open the client interface: {client_url}")
         print("📝 Or copy this link to your browser to test the digit classifier!")
+        print("###############################################")
+
+        # Auto-open in browser
+        webbrowser.open(client_url)
+        print("🚀 Opening client interface in your default browser...")
     else:
         print("⚠️  Client HTML file not found at ../client/index.html")
 
